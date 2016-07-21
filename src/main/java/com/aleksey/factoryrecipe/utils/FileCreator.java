@@ -49,6 +49,7 @@ public class FileCreator {
 
 	private PrintWriter writer;
 	private HashSet<String> _badItems;
+	private HashMap<String, String> _upgradeAnchorMap;
 	
 	public FileCreator() {
 		if(_nameReplacements != null) return;
@@ -90,7 +91,9 @@ public class FileCreator {
 		HashMap<String, IFactoryEgg> eggs = manager.getAllEggs();
 
 		Node root = new Node(null, null);
-		HashMap<FurnCraftChestEgg, Node> nodeMap = new HashMap<FurnCraftChestEgg, Node>(); 
+		HashMap<FurnCraftChestEgg, Node> nodeMap = new HashMap<FurnCraftChestEgg, Node>();
+		
+		_upgradeAnchorMap = new HashMap<String, String>();
 		
 		for(IFactoryEgg egg : eggs.values()) {
 			if(!(egg instanceof FurnCraftChestEgg)) continue;
@@ -131,7 +134,7 @@ public class FileCreator {
 		}
 	}
 	
-	private static List<FurnCraftChestEgg> getChildFactories(FurnCraftChestEgg parent) {
+	private List<FurnCraftChestEgg> getChildFactories(FurnCraftChestEgg parent) {
 		ArrayList<FurnCraftChestEgg> result = new ArrayList<FurnCraftChestEgg>();
 		
 		for(IRecipe recipe : parent.getRecipes()) {
@@ -140,6 +143,8 @@ public class FileCreator {
 				
 				if(egg instanceof FurnCraftChestEgg) {
 					result.add((FurnCraftChestEgg)egg);
+					
+					_upgradeAnchorMap.put(egg.getName(), getAnchor(recipe.getRecipeName()));
 				}
 			}
 		}
@@ -175,6 +180,8 @@ public class FileCreator {
 		this.writer.println("table.item-list td+td+td { padding-right: 0px; }");
 		this.writer.println("td.prod-time, td.weight { text-align:center; }");
 		this.writer.println("span.item-section { font-style: italic; }");
+		this.writer.println("div.factory-header div { float:left; }");
+		this.writer.println("div.factory-header div+div { float:left; padding-top:22px; padding-left:20px; }");
 		this.writer.println("</style>");
 		this.writer.println("</head>");
 		this.writer.println("<body>");
@@ -240,23 +247,12 @@ public class FileCreator {
 			recipes.add(nextNode.fcc);
 		}
 		
-		if(node.parent.parent == null || node.parent.parent.parent == null) {
-			this.writer.println("<a id=" + getSectionAnchor(node.fcc) + "></a>");
-		}
-		
-		if(node.parent.parent == null) {
-			this.writer.println("<h2>" + factoryName + "</h2>");
-		}
-		else {
-			if(node.parent.parent.parent == null) {
-				this.writer.println("<h2>" + getSectionName(node.fcc) + "</h2>");
-			}
-			
-			this.writer.println("<h3>" + factoryName + "</h3>");
-		}
-		
 		boolean hasWeightColumn = node.fcc.getName().toLowerCase().indexOf("pylon") >= 0;
 		boolean showSetupCost = node.parent.parent == null;
+		boolean showLevel = recipes.size() > 1;
+
+		writeFactoryHeader(node, factoryName, showLevel);
+		
 		
 		this.writer.println("<table class=recipe-list>");
 		this.writer.println("<tr>");
@@ -272,7 +268,7 @@ public class FileCreator {
 		HashSet<IRecipe> shownRecipes = new HashSet<IRecipe>();
 		
 		for(FurnCraftChestEgg fcc : recipes) {
-			writeRecipeList(fcc, hasWeightColumn, showSetupCost, shownRecipes, recipes.size() > 1);
+			writeRecipeList(fcc, hasWeightColumn, showSetupCost, shownRecipes, showLevel);
 		}
 		
 		this.writer.println("</table>");
@@ -284,8 +280,38 @@ public class FileCreator {
 		}
 	}
 	
+	private void writeFactoryHeader(Node node, String factoryName, boolean showLevel) {
+		if(node.parent.parent == null || node.parent.parent.parent == null) {
+			this.writer.println("<a id=" + getSectionAnchor(node.fcc) + "></a>");
+		}
+		
+		if(node.parent.parent == null) {
+			this.writer.println("<h2>" + factoryName + "</h2>");
+		}
+		else {
+			if(node.parent.parent.parent == null) {
+				this.writer.println("<h2>" + getSectionName(node.fcc) + "</h2>");
+			}
+			
+			if(!showLevel) {
+				this.writer.println("<a id=" + getAnchor(node.fcc.getName()) + "></a>");
+			}
+			
+			String upgradeAnchor = _upgradeAnchorMap.get(node.fcc.getName());
+			
+			this.writer.println("<div class=factory-header>");
+			this.writer.println("<div><h3>" + factoryName + "</div></h3>");
+			this.writer.println("<div>(<a href='#" + upgradeAnchor + "'>Show Upgrade Recipe</a>)</div>");
+			this.writer.println("</div>");
+		}
+	}
+	
 	private static String getSectionAnchor(FurnCraftChestEgg fcc) {
-		return getSectionName(fcc).toLowerCase().replace(' ', '-');
+		return getAnchor(getSectionName(fcc));
+	}
+	
+	private static String getAnchor(String name) {
+		return name.toLowerCase().replace(' ', '-');
 	}
 	
 	private static String getSectionName(FurnCraftChestEgg fcc) {
@@ -313,7 +339,10 @@ public class FileCreator {
 		if(showLevel) {
 			int colspan = hasWeightColumn ? 6: 5;
 			
-			this.writer.println("<tr><th colspan=" + colspan + ">" + fcc.getName() + "</th></tr>");
+			this.writer.println("<tr><th colspan=" + colspan + ">");
+			this.writer.println("<a id=" + getAnchor(fcc.getName()) + "></a>");
+			this.writer.println(fcc.getName());
+			this.writer.println("</th></tr>");
 		}
 		
 		ItemStack fuel = fcc.getFuel();
@@ -427,7 +456,19 @@ public class FileCreator {
 	}
 	
 	private void writeNotes(RecipeInfo info) {
+		if(info.anchor != null) {
+			this.writer.println("<a id='" + info.anchor + "'></a>");
+		}
+		
+		if(info.link != null) {
+			this.writer.println("<a href='#" + info.link + "'>");
+		}
+		
 		this.writer.println(info.name);
+		
+		if(info.link != null) {
+			this.writer.println("</a>");
+		}
 		
 		if(info.inputExcluded.size() > 0) {
 			this.writer.println("<div>");
@@ -558,7 +599,11 @@ public class FileCreator {
 	private boolean getUpgradeRecipeInfo(IRecipe recipeInterface, RecipeInfo info) {
 		if(!(recipeInterface instanceof Upgraderecipe)) return false;
 		
+		Upgraderecipe recipe = (Upgraderecipe)recipeInterface;
+		
 		info.type = "UPGRADE";
+		info.link = getAnchor(recipe.getEgg().getName());
+		info.anchor = getAnchor(recipe.getRecipeName());
 		
 		return true;
 	}

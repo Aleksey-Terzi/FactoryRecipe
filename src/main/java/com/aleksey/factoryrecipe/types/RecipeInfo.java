@@ -12,6 +12,8 @@ public class RecipeInfo {
 	public String name;
 	public int fuelConsumptionInterval;
 	public int weight;
+	public String link;
+	public String anchor;
 	
 	public RecipeInfo() {
 		this.output = new ArrayList<ItemInfo>();
