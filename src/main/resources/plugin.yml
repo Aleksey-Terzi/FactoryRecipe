@@ -1,0 +1,13 @@
+name: ${project.name}
+main: com.aleksey.factoryrecipe.FactoryRecipe
+version: ${project.version}
+author: Aleksey-Terzi
+description: 'FactoryRecipe'
+depend: [CivModCore, FactoryMod]
+commands:
+  fr:
+    description: Create recipe file
+permissions:
+    FactoryRecipe.op:
+        description: Op
+        default: op
