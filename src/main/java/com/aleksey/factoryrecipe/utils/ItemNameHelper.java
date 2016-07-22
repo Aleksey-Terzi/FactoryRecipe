@@ -582,6 +582,7 @@ public class ItemNameHelper {
             .put("422", "Minecart with Command Block")
             .put("423", "Raw Mutton")
             .put("424", "Cooked Mutton")
+            .put("442", "Shield")
             .put("2256", "Music Disk (13)")
             .put("2257", "Music Disk (Cat)")
             .put("2258", "Music Disk (Blocks)")
@@ -633,7 +634,7 @@ public class ItemNameHelper {
         if(result == null) {
         	result = stack.getDurability() == 0 && map.containsKey(key)
         		? map.get(key)
-        		: "NO_FOUND:" + stack.getType().toString() + ":" + stack.getDurability();
+        		: "NOT_FOUND:" + stack.getType().toString() + ":" + stack.getDurability();
         }
 
         return result;
