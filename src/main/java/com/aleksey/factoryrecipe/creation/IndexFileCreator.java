@@ -1,4 +1,4 @@
-package com.aleksey.factoryrecipe.utils;
+package com.aleksey.factoryrecipe.creation;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -14,8 +14,9 @@ import com.aleksey.factoryrecipe.types.FactoryGroupInfo;
 import com.aleksey.factoryrecipe.types.FactoryInfo;
 import com.aleksey.factoryrecipe.types.ItemInfo;
 import com.aleksey.factoryrecipe.types.RecipeInfo;
+import com.aleksey.factoryrecipe.utils.ResourceHelper;
 
-public class FileCreator {
+public class IndexFileCreator {
 	private FactoryListCreator factoryListCreator; 
 	private PrintWriter writer;
 	
@@ -24,13 +25,13 @@ public class FileCreator {
 		this.factoryListCreator.create();
 		
 		try {
-			this.writer = new PrintWriter("recipes.html", "UTF-8");
+			this.writer = new PrintWriter("index.html", "UTF-8");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			return true;
+			return false;
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
-			return true;
+			return false;
 		}
         
         try {
@@ -43,6 +44,8 @@ public class FileCreator {
 	}
 	
 	private void writeFile() {
+		String style = ResourceHelper.readText("/index_style.txt");
+		
 		this.writer.println("<!DOCTYPE html>");
 		this.writer.println("<html>");
 		this.writer.println("<head lang=\"en\">");
@@ -50,33 +53,13 @@ public class FileCreator {
 		this.writer.println("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />");
 		this.writer.println("<meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\" />");
 		
-		this.writer.println("<style>");
-		this.writer.println("body {");
-		this.writer.println("    font-family: \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\";");
-		this.writer.println("	color: #333;");
-		this.writer.println("}");
-		this.writer.println("h2 { border-bottom: 1px solid #eee; }");
-		this.writer.println("table td { vertical-align: top; }");
-		this.writer.println("div.main { margin:auto; width:1020px; }");
-		this.writer.println("table.recipe-list { border-collapse: collapse; border: 1px solid #ddd; width:100%; }");
-		this.writer.println("table.recipe-list > tbody > tr > td,");
-		this.writer.println("table.recipe-list > tbody > tr > th { border: 1px solid #ddd; padding:5px; margin:0px; }");
-		this.writer.println("table.recipe-list > tbody > tr:nth-child(even) { background-color: #F8F8F8; }");
-		this.writer.println("table.recipe-list > tbody > tr:nth-child(odd) { background-color: white; }");
-		this.writer.println("table.item-list td { text-align: center; min-width:50px;}");
-		this.writer.println("table.item-list td+td { text-align: left; min-width:0px; padding-right:15px; }");
-		this.writer.println("table.item-list td+td+td { padding-right: 0px; }");
-		this.writer.println("td.prod-time, td.weight { text-align:center; }");
-		this.writer.println("span.item-section { font-style: italic; }");
-		this.writer.println("div.factory-header div { float:left; }");
-		this.writer.println("div.factory-header div+div { float:left; padding-top:22px; padding-left:20px; }");
-		this.writer.println("</style>");
+		this.writer.write(style);
+		
 		this.writer.println("</head>");
 		this.writer.println("<body>");
 		
 		this.writer.println("<div class=main>");
 		this.writer.println("<h1>Recipes for Factory plugin of CivCraft: Worlds</h1>");
-		
 		
 		writeContent();
 		
@@ -103,7 +86,25 @@ public class FileCreator {
 		this.writer.println("<ul>");
 		
 		for(FactoryGroupInfo group : this.factoryListCreator.getGroups()) {
-			this.writer.println("<li><a href='#" + group.anchor + "'>" + group.name + "</a></li>");
+			this.writer.println("<li>");
+
+			this.writer.println("<a href='#" + group.anchor + "'>" + group.name + "</a>");
+			
+			if(group.factories.size() > 1) {
+				this.writer.println("<ul>");
+				
+				for(FactoryInfo factoryInfo : group.factories) {
+					String anchor = factoryInfo.levels.size() == 0 ? factoryInfo.anchor: factoryInfo.levels.get(0).anchor;
+					
+					this.writer.println("<li>");
+					this.writer.println("<a href='#" + anchor + "'>" + factoryInfo.name + "</a>");
+					this.writer.println("</li>");
+				}
+				
+				this.writer.println("</ul>");
+			}
+			
+			this.writer.println("</li>");
 		}
 		
 		this.writer.println("</ul>");

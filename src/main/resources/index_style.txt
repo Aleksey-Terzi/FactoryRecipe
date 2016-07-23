@@ -1,0 +1,28 @@
+<style>
+    body {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    	color: #333;
+    }
+    
+    h2 { border-bottom: 1px solid #eee; }
+    
+    table td { vertical-align: top; }
+    
+    div.main { margin:auto; width:1020px; }
+
+    table.recipe-list { border-collapse: collapse; border: 1px solid #ddd; width:100%; }
+    table.recipe-list > tbody > tr > td,
+    table.recipe-list > tbody > tr > th { border: 1px solid #ddd; padding:5px; margin:0px; }
+    table.recipe-list > tbody > tr:nth-child(even) { background-color: #F8F8F8; }
+    table.recipe-list > tbody > tr:nth-child(odd) { background-color: white; }
+
+    table.item-list td { text-align: center; min-width:50px;}
+    table.item-list td+td { text-align: left; min-width:0px; padding-right:15px; }
+    table.item-list td+td+td { padding-right: 0px; }
+
+    td.prod-time, td.weight { text-align:center; }
+    span.item-section { font-style: italic; }
+    div.factory-header div { float:left; }
+    div.factory-header div+div { float:left; padding-top:22px; padding-left:20px; }
+
+</style>

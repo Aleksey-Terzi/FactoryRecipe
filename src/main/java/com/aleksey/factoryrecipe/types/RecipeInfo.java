@@ -22,7 +22,7 @@ public class RecipeInfo implements Comparable<RecipeInfo> {
 	}
 	
 	public int compareTo(RecipeInfo o) {
-		int cmp = getTypeSequence(o.type).compareTo(getTypeSequence(type));
+		int cmp = getTypeSequence(type).compareTo(getTypeSequence(o.type));
 		
 		if(cmp != 0 || this.output.size() == 0 || o.output.size() == 0) {
 			return cmp;

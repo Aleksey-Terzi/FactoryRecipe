@@ -1,4 +1,4 @@
-package com.aleksey.factoryrecipe.utils;
+package com.aleksey.factoryrecipe.creation;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -22,6 +22,8 @@ import com.aleksey.factoryrecipe.types.FactoryInfo;
 import com.aleksey.factoryrecipe.types.ItemInfo;
 import com.aleksey.factoryrecipe.types.Node;
 import com.aleksey.factoryrecipe.types.RecipeInfo;
+import com.aleksey.factoryrecipe.utils.ItemNameHelper;
+import com.aleksey.factoryrecipe.utils.ItemStackHelper;
 import com.github.igotyou.FactoryMod.FactoryMod;
 import com.github.igotyou.FactoryMod.FactoryModManager;
 import com.github.igotyou.FactoryMod.eggs.FurnCraftChestEgg;
@@ -207,7 +209,11 @@ public class FactoryListCreator {
 			}
 			
 			readRecipeList(fcc, addSetupCost, shownRecipes, levelInfo);
+			
+			Collections.sort(levelInfo.recipes);
 		}
+		
+		Collections.sort(factoryInfo.recipes);
 		
 		// Read next factories
 		for(Node child : nextNode.children) {
