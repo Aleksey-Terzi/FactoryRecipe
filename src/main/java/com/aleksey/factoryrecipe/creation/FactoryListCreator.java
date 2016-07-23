@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -20,10 +20,12 @@ import vg.civcraft.mc.civmodcore.itemHandling.ItemMap;
 import com.aleksey.factoryrecipe.types.FactoryGroupInfo;
 import com.aleksey.factoryrecipe.types.FactoryInfo;
 import com.aleksey.factoryrecipe.types.ItemInfo;
+import com.aleksey.factoryrecipe.types.ItemSummaryInfo;
 import com.aleksey.factoryrecipe.types.Node;
 import com.aleksey.factoryrecipe.types.RecipeInfo;
 import com.aleksey.factoryrecipe.utils.ItemNameHelper;
 import com.aleksey.factoryrecipe.utils.ItemStackHelper;
+import com.aleksey.factoryrecipe.utils.LinkHelper;
 import com.github.igotyou.FactoryMod.FactoryMod;
 import com.github.igotyou.FactoryMod.FactoryModManager;
 import com.github.igotyou.FactoryMod.eggs.FurnCraftChestEgg;
@@ -49,6 +51,7 @@ public class FactoryListCreator {
 	private HashMap<String, String> upgradeAnchorMap;
 	private List<FactoryGroupInfo> groups;
 	private FactoryGroupInfo current;
+	private HashMap<String, ItemSummaryInfo> itemSummaryMap;
 	
 	public HashSet<String> getBadItems() {
 		return this.badItems; 
@@ -56,6 +59,10 @@ public class FactoryListCreator {
 	
 	public List<FactoryGroupInfo> getGroups() {
 		return this.groups; 
+	}
+	
+	public HashMap<String, ItemSummaryInfo> getItemSummaryMap() {
+		return this.itemSummaryMap;
 	}
 
 	public FactoryListCreator() {
@@ -74,6 +81,7 @@ public class FactoryListCreator {
 	public void create() {
 		this.badItems = new HashSet<String>();
 		this.groups = new ArrayList<FactoryGroupInfo>();
+		this.itemSummaryMap = new HashMap<String, ItemSummaryInfo>();
 		
 		Node root = createFactoryTree();
 		
@@ -140,16 +148,12 @@ public class FactoryListCreator {
 				if(egg instanceof FurnCraftChestEgg) {
 					result.add((FurnCraftChestEgg)egg);
 					
-					this.upgradeAnchorMap.put(egg.getName(), getAnchor(recipe.getRecipeName()));
+					this.upgradeAnchorMap.put(egg.getName(), LinkHelper.getAnchor(recipe.getRecipeName()));
 				}
 			}
 		}
 		
 		return result;
-	}
-	
-	private static String getAnchor(String name) {
-		return name.toLowerCase().replace(' ', '-');
 	}
 	
 	private void readFactory(Node node) {
@@ -171,7 +175,7 @@ public class FactoryListCreator {
 		//Get factory's attributes
 		boolean hasLevels = recipes.size() > 1;
 		boolean addSetupCost = node.parent.parent == null;
-		String factoryAnchor = hasLevels ? null: getAnchor(node.fcc.getName());
+		String factoryAnchor = hasLevels ? null: LinkHelper.getAnchor(node.fcc.getName());
 		String upgradeLink = "#" + this.upgradeAnchorMap.get(node.fcc.getName());
 
 		if(node.parent.parent == null || node.parent.parent.parent == null) {
@@ -186,10 +190,10 @@ public class FactoryListCreator {
 				groupName = getGroupName(node.fcc);
 			}
 			
-			this.groups.add(this.current = new FactoryGroupInfo(groupName, getAnchor(groupName)));
+			this.groups.add(this.current = new FactoryGroupInfo(groupName, LinkHelper.getAnchor(groupName)));
 		}
 		
-		FactoryInfo factoryInfo = new FactoryInfo(factoryName, factoryAnchor, upgradeLink);
+		FactoryInfo factoryInfo = new FactoryInfo(node.fcc.getName(), factoryName, factoryAnchor, upgradeLink);
 		
 		this.current.factories.add(factoryInfo);
 		
@@ -201,9 +205,9 @@ public class FactoryListCreator {
 			
 			if(hasLevels) {
 				String levelUpgradeLink = "#" + this.upgradeAnchorMap.get(fcc.getName());
-				String levelAnchor = getAnchor(fcc.getName());
+				String levelAnchor = LinkHelper.getAnchor(fcc.getName());
 				
-				factoryInfo.levels.add(levelInfo = new FactoryInfo(fcc.getName(), levelAnchor, levelUpgradeLink));
+				factoryInfo.levels.add(levelInfo = new FactoryInfo(fcc.getName(), fcc.getName(), levelAnchor, levelUpgradeLink));
 			} else {
 				levelInfo = factoryInfo;
 			}
@@ -247,9 +251,11 @@ public class FactoryListCreator {
 		}
 		
 		for(IRecipe recipe : fcc.getRecipes()) {
-			if(shownRecipes.contains(recipe)) continue;
-			
 			RecipeInfo recipeInfo = getRecipeInfo(fcc, recipe);
+			
+			addItemSummary(factoryInfo, recipeInfo);
+
+			if(shownRecipes.contains(recipe)) continue;
 			
 			factoryInfo.recipes.add(recipeInfo);
 			
@@ -258,6 +264,58 @@ public class FactoryListCreator {
 			}
 		}
 	}
+	
+	private void addItemSummary(FactoryInfo factoryInfo, RecipeInfo recipeInfo) {
+		if(recipeInfo.type.equalsIgnoreCase("ENCHANT")
+				|| recipeInfo.type.equalsIgnoreCase("COMPACT")
+				|| recipeInfo.type.equalsIgnoreCase("DECOMPACT")
+			)
+		{
+			return;
+		}
+		
+		for(ItemInfo itemInfo : recipeInfo.input) {
+			if(itemInfo.rawName == null || itemInfo.rawName.equalsIgnoreCase("Essence")) {
+				continue;
+			}
+			
+			String anchor = LinkHelper.getAnchor(itemInfo.rawName);
+			ItemSummaryInfo itemSummaryInfo = this.itemSummaryMap.get(anchor);
+			
+			if(itemSummaryInfo == null) {
+				itemSummaryInfo = new ItemSummaryInfo(itemInfo.rawName, anchor);
+				this.itemSummaryMap.put(anchor, itemSummaryInfo);
+			}
+			
+			if(!itemSummaryInfo.inputFactories.contains(factoryInfo)) {
+				itemSummaryInfo.inputFactories.add(factoryInfo);
+			}
+		}
+
+		for(ItemInfo itemInfo : recipeInfo.output) {
+			if(itemInfo.rawName == null) continue;
+			
+			String anchor = LinkHelper.getAnchor(itemInfo.rawName);
+			ItemSummaryInfo itemSummaryInfo = this.itemSummaryMap.get(anchor);
+			
+			if(itemSummaryInfo == null) {
+				itemSummaryInfo = new ItemSummaryInfo(itemInfo.rawName, anchor);
+				this.itemSummaryMap.put(anchor, itemSummaryInfo);
+			}
+			
+			if(recipeInfo.type.equalsIgnoreCase("RANDOM")) {
+				if(!itemSummaryInfo.outputFactories.contains(factoryInfo)
+					&& !itemSummaryInfo.randomFactories.contains(factoryInfo))
+				{
+					itemSummaryInfo.randomFactories.add(factoryInfo);
+				}
+			}
+			else if(!itemSummaryInfo.outputFactories.contains(factoryInfo)) {
+				itemSummaryInfo.outputFactories.add(factoryInfo);
+				itemSummaryInfo.randomFactories.remove(factoryInfo);
+			}
+		}
+}
 	
 	private RecipeInfo getSetupCost(IFactoryEgg egg) {
 		FactoryModManager manager = FactoryMod.getManager();
@@ -326,8 +384,8 @@ public class FactoryListCreator {
 		
 		info.type = "COMPACT";
 		
-		info.input.add(new ItemInfo("Stack of Items", 1));
-		info.output.add(new ItemInfo("Compacted Item", 1));
+		info.input.add(new ItemInfo(null, "Stack of Items", 1));
+		info.output.add(new ItemInfo(null, "Compacted Item", 1));
 
 		@SuppressWarnings("unchecked")
 		List<Material> excludedMaterials = (List<Material>)getFieldValue(recipeInterface, "excludedMaterials");
@@ -346,8 +404,8 @@ public class FactoryListCreator {
 		
 		info.type = "DECOMPACT";
 		
-		info.input.add(new ItemInfo("Compacted Item", 1));
-		info.output.add(new ItemInfo("Stack of Items", 1));
+		info.input.add(new ItemInfo(null, "Compacted Item", 1));
+		info.output.add(new ItemInfo(null, "Stack of Items", 1));
 		
 		return true;
 	}
@@ -359,7 +417,7 @@ public class FactoryListCreator {
 		
 		int healthPerRun = (int)getFieldValue(recipeInterface, "healthPerRun");
 		
-		info.output.add(new ItemInfo("Health", healthPerRun));
+		info.output.add(new ItemInfo(null, "Health", healthPerRun));
 		
 		return true;
 	}
@@ -370,8 +428,8 @@ public class FactoryListCreator {
 		Upgraderecipe recipe = (Upgraderecipe)recipeInterface;
 		
 		info.type = "UPGRADE";
-		info.link = getAnchor(recipe.getEgg().getName());
-		info.anchor = getAnchor(recipe.getRecipeName());
+		info.link = LinkHelper.getAnchor(recipe.getEgg().getName());
+		info.anchor = LinkHelper.getAnchor(recipe.getRecipeName());
 		
 		return true;
 	}
@@ -460,34 +518,43 @@ public class FactoryListCreator {
 	}
 	
 	private ItemInfo getItemInfo(ItemStack stack, int amount) {
-		String name = ItemStackHelper.getLore(stack);
-		boolean isCompacted = Objects.equal(name, "Compacted Item");
+		String rawName = ItemStackHelper.getLore(stack);
+		String name;
+		boolean isCompacted = Objects.equal(rawName, "Compacted Item");
 		
-		if(isCompacted || name == null || name.length() == 0) {
+		if(isCompacted || rawName == null || rawName.length() == 0) {
 			String key = stack.getType() + ":" + stack.getDurability();
 			
-			name = _nameReplacements.get(key);
+			rawName = _nameReplacements.get(key);
 			
-			if(name == null || name.length() == 0) {
+			if(rawName == null || rawName.length() == 0) {
 				if(stack.getDurability() < 0) {
 					this.badItems.add(stack.getType() + ":" + stack.getDurability());
 				}
 				
-				name = ItemNameHelper.lookup(stack);
+				rawName = ItemNameHelper.lookup(stack);
 			}
+			
+			name = rawName;
 			
 			String enchantText = ItemStackHelper.getEnchantList(stack);
 			
 			if(enchantText != null) {
 				name += " (" + enchantText + ")";
 			}
+		} else {
+			name = rawName;
 		}
 		
 		if(isCompacted) {
 			name = "Compacted " + name;
 		}
 		
-		return new ItemInfo(name, amount);
+		if(rawName.equalsIgnoreCase("Aether\nCompacted Item")) {
+			rawName = "Aether";
+		}
+
+		return new ItemInfo(rawName, name, amount);
 	}
 	
 	private static Object getFieldValue(Object obj, String fieldName) {

@@ -15,6 +15,11 @@
     table.recipe-list > tbody > tr > th { border: 1px solid #ddd; padding:5px; margin:0px; }
     table.recipe-list > tbody > tr:nth-child(even) { background-color: #F8F8F8; }
     table.recipe-list > tbody > tr:nth-child(odd) { background-color: white; }
+    table.recipe-list > tbody > tr > td.input a,
+	table.recipe-list > tbody > tr > td.output a { text-decoration:none; color: #333; }
+    table.recipe-list > tbody > tr > td.input a:hover,
+	table.recipe-list > tbody > tr > td.output a:hover { text-decoration:underline; color: blue; }
+	table.recipe-list > tbody > tr > td ul { margin: 0; }
 
     table.item-list td { text-align: center; min-width:50px;}
     table.item-list td+td { text-align: left; min-width:0px; padding-right:15px; }

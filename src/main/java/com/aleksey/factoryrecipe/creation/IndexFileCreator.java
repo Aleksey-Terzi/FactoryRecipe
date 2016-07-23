@@ -14,15 +14,15 @@ import com.aleksey.factoryrecipe.types.FactoryGroupInfo;
 import com.aleksey.factoryrecipe.types.FactoryInfo;
 import com.aleksey.factoryrecipe.types.ItemInfo;
 import com.aleksey.factoryrecipe.types.RecipeInfo;
+import com.aleksey.factoryrecipe.utils.LinkHelper;
 import com.aleksey.factoryrecipe.utils.ResourceHelper;
 
 public class IndexFileCreator {
 	private FactoryListCreator factoryListCreator; 
 	private PrintWriter writer;
 	
-	public boolean create() {
-		this.factoryListCreator = new FactoryListCreator();
-		this.factoryListCreator.create();
+	public boolean create(FactoryListCreator factoryListCreator) {
+		this.factoryListCreator = factoryListCreator;
 		
 		try {
 			this.writer = new PrintWriter("index.html", "UTF-8");
@@ -185,12 +185,12 @@ public class IndexFileCreator {
 		this.writer.println("<tr>");
 		
 		//Output
-		this.writer.println("<td>");
+		this.writer.println("<td class=output>");
 		writeItemList(info.output);
 		this.writer.println("</td>");
 		
 		//Input
-		this.writer.println("<td>");
+		this.writer.println("<td class=input>");
 
 		if(info.input.size() > 0) {
 			this.writer.println("<span class=item-section>Ingredients:</span>");
@@ -232,10 +232,27 @@ public class IndexFileCreator {
 		this.writer.println("<table class=item-list>");
 		
 		for(ItemInfo info : items) {
+			String anchor = LinkHelper.getAnchor(info.rawName);
+			boolean isInSummary = this.factoryListCreator.getItemSummaryMap().containsKey(anchor);
+			
 			this.writer.println("<tr>");
 			this.writer.print("<td>" + info.amount + "</td>");
 			this.writer.print("<td>x</td>");
-			this.writer.print("<td>" + info.name + "</td>");
+			
+			this.writer.print("<td>");
+			
+			if(isInSummary) {
+				this.writer.print("<a href='item-summary.html#" + anchor + "'>");
+			}
+			
+			this.writer.print(info.name);
+
+			if(isInSummary) {
+				this.writer.print("</a>");
+			}
+
+			this.writer.print("</td>");
+			
 			this.writer.println("</tr>");
 		}
 		

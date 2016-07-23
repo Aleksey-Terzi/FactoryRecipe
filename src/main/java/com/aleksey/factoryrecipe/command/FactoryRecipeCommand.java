@@ -7,7 +7,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.aleksey.factoryrecipe.FactoryRecipe;
+import com.aleksey.factoryrecipe.creation.FactoryListCreator;
 import com.aleksey.factoryrecipe.creation.IndexFileCreator;
+import com.aleksey.factoryrecipe.creation.ItemSummaryFileCreator;
 
 public class FactoryRecipeCommand {
 	public static boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -15,7 +17,11 @@ public class FactoryRecipeCommand {
 			return false;
 		}
 		
-		boolean result = new IndexFileCreator().create();
+		FactoryListCreator factoryListCreator = new FactoryListCreator();
+		factoryListCreator.create();
+		
+		boolean result = new IndexFileCreator().create(factoryListCreator)
+				&& new ItemSummaryFileCreator().create(factoryListCreator);
 		
 		String message = result
 			? "Files have been created."
