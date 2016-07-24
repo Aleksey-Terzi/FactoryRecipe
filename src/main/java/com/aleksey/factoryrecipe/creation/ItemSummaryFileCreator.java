@@ -16,11 +16,13 @@ import com.aleksey.factoryrecipe.utils.ResourceHelper;
 
 public class ItemSummaryFileCreator {
 	private FactoryListCreator factoryListCreator;
+	private String title;
 	private List<ItemSummaryInfo> itemSummaryList;
 	private PrintWriter writer;
 	
-	public boolean create(FactoryListCreator factoryListCreator) {
+	public boolean create(FactoryListCreator factoryListCreator, String title) {
 		this.factoryListCreator = factoryListCreator;
+		this.title = title;
 		
 		createItemSummaryList();
 		
@@ -61,7 +63,7 @@ public class ItemSummaryFileCreator {
 		this.writer.println("<!DOCTYPE html>");
 		this.writer.println("<html>");
 		this.writer.println("<head lang=\"en\">");
-		this.writer.println("<title>Recipes for Factory plugin of CivCraft: Worlds</title>");
+		this.writer.println("<title>Recipes for Factory plugin of " + this.title + "</title>");
 		this.writer.println("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />");
 		this.writer.println("<meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\" />");
 		

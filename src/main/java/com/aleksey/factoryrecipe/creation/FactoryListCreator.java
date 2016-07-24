@@ -229,12 +229,19 @@ public class FactoryListCreator {
 		String name = fcc.getName();
 
 		if(name.equalsIgnoreCase("Basic Forge")) return "Enchanting";
+		
+		//Civcraft
 		if(name.equalsIgnoreCase("Basic Fortifications")) return "Fortifications";
 		if(name.equalsIgnoreCase("Blacksmith")) return "Blacksmith";
 		if(name.equalsIgnoreCase("Farmstead Factory")) return "Agriculture and XP Production";
 		if(name.equalsIgnoreCase("Laboratory")) return "Aether and Advanced Techs";
 		if(name.equalsIgnoreCase("Stone Smelter")) return "Smelter";
 		if(name.equalsIgnoreCase("Wood Processor")) return "Wood Processor";
+		
+		//CivClassic
+		if(name.equalsIgnoreCase("Earthen Grill")) return "Grill";
+		if(name.equalsIgnoreCase("Earthen Oven")) return "Oven";
+		if(name.equalsIgnoreCase("Primitive Armorer")) return "Armorer";
 		
 		return name;
 	}

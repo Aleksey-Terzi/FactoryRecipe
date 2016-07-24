@@ -18,11 +18,13 @@ import com.aleksey.factoryrecipe.utils.LinkHelper;
 import com.aleksey.factoryrecipe.utils.ResourceHelper;
 
 public class IndexFileCreator {
+	private String title;
 	private FactoryListCreator factoryListCreator; 
 	private PrintWriter writer;
 	
-	public boolean create(FactoryListCreator factoryListCreator) {
+	public boolean create(FactoryListCreator factoryListCreator, String title) {
 		this.factoryListCreator = factoryListCreator;
+		this.title = title;
 		
 		try {
 			this.writer = new PrintWriter("index.html", "UTF-8");
@@ -49,7 +51,7 @@ public class IndexFileCreator {
 		this.writer.println("<!DOCTYPE html>");
 		this.writer.println("<html>");
 		this.writer.println("<head lang=\"en\">");
-		this.writer.println("<title>Recipes for Factory plugin of CivCraft: Worlds</title>");
+		this.writer.println("<title>Recipes for Factory plugin of " + this.title + "</title>");
 		this.writer.println("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />");
 		this.writer.println("<meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\" />");
 		
@@ -59,7 +61,7 @@ public class IndexFileCreator {
 		this.writer.println("<body>");
 		
 		this.writer.println("<div class=main>");
-		this.writer.println("<h1>Recipes for Factory plugin of CivCraft: Worlds</h1>");
+		this.writer.println("<h1>Recipes for Factory plugin of " + this.title + "</h1>");
 		
 		writeContent();
 		

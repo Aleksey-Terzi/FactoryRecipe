@@ -20,11 +20,13 @@ public class FactoryRecipeCommand {
 		FactoryListCreator factoryListCreator = new FactoryListCreator();
 		factoryListCreator.create();
 		
-		boolean result = new IndexFileCreator().create(factoryListCreator)
-				&& new ItemSummaryFileCreator().create(factoryListCreator);
+		String title = args.length > 0 && args[0].equals("1") ? "CivClassic": "CivCraft: Worlds";
+		
+		boolean result = new IndexFileCreator().create(factoryListCreator, title)
+				&& new ItemSummaryFileCreator().create(factoryListCreator, title);
 		
 		String message = result
-			? "Files have been created."
+			? "Files have been created for '" + title + "'"
 			: "Failed to create files.";
         
     	if(sender instanceof Player) {

@@ -582,6 +582,7 @@ public class ItemNameHelper {
             .put("422", "Minecart with Command Block")
             .put("423", "Raw Mutton")
             .put("424", "Cooked Mutton")
+            .put("437", "Dragon's Breath")
             .put("442", "Shield")
             .put("2256", "Music Disk (13)")
             .put("2257", "Music Disk (Cat)")
