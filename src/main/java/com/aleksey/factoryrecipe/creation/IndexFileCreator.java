@@ -107,6 +107,10 @@ public class IndexFileCreator {
 			this.writer.println("</li>");
 		}
 		
+		this.writer.println("<li>");
+		this.writer.println("<a href='item-summary.html'>Appendix: Summary by Items</a>");
+		this.writer.println("</li>");
+		
 		this.writer.println("</ul>");
 	}
 	
@@ -182,7 +186,7 @@ public class IndexFileCreator {
 	}
 	
 	private void writeRecipe(RecipeInfo info, boolean hasWeightColumn) {
-		this.writer.println("<tr>");
+		this.writer.println("<tr class=" + info.type.toLowerCase() + ">");
 		
 		//Output
 		this.writer.println("<td class=output>");
